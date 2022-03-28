@@ -1,1 +1,1 @@
-# talanc.github.io
+Go to https://talanc.github.io.
