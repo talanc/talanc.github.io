@@ -1,1 +1,69 @@
-Hello World.
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <script>
+        // Copied from https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest#examples
+        async function digestMessage(message) {
+            const msgUint8 = new TextEncoder().encode(message);                           // encode as (utf-8) Uint8Array
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);           // hash the message
+            const hashArray = Array.from(new Uint8Array(hashBuffer));                     // convert buffer to byte array
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string
+            return hashHex;
+        }
+
+        // Shows the sequence puzzle
+        function showSeq() {
+            document.getElementById('seqroot').style.display = '';
+            document.getElementById('seqshow').style.display = 'none';
+        }
+
+        // Shows the contact email if the sequence answers are correct
+        async function calcEmail() {
+            const seq1 = document.getElementById('seq1');
+            const seq2 = document.getElementById('seq2');
+            const seq3 = document.getElementById('seq3');
+            const seqout = document.getElementById('seqout');
+
+            const email = String.fromCharCode(112 + parseInt(seq1.value)) +
+                "a" +
+                String.fromCharCode(100 + parseInt(seq2.value)) +
+                "a" +
+                String.fromCharCode(104 + parseInt(seq3.value)) +
+                ".copeland@gmail.com";
+
+            const emailHash = await digestMessage(email);
+
+            // Populated via developer console: await digestMessage(<< email >>)
+            const expectedHash = "58bc4f9771580f04204ac782870933528c5dc70919366ae98b979007a40928ce";
+
+            if (expectedHash !== emailHash) {
+                seqout.innerText = "Invalid sequence(s), please try again.";
+            } else {
+                seqout.innerHTML = "Email: <a href='mailto:" + email + "'>" + email + "</a>";
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div>
+        <h1>Contact</h1>
+        <input id="seqshow" type="button" value="Get email" onclick="showSeq()">
+        <div id="seqroot" style="display: none;">
+            Fill in the blanks:
+            <p>1,2,3,<input id="seq1" type="number" style="width: 4rem;"></p>
+            <p>2,4,6,<input id="seq2" type="number" style="width: 4rem;"></p>
+            <p>9,8,7,<input id="seq3" type="number" style="width: 4rem;"></p>
+            <input type="button" value="Get email" onclick="calcEmail()">
+            <p id="seqout"></p>
+        </div>
+    </div>
+</body>
+
+</html>
